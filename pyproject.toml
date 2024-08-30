@@ -14,9 +14,37 @@ build-backend = "hatchling.build"
 packages = ["src/ui", 'src/domain']
 
 [tool.uv]
-dev-dependencies = ["pytest>=8.3.2", "pre-commit>=3.8.0", "pyright>=1.1.378"]
+dev-dependencies = [
+    "pytest>=8.3.2",
+    "pre-commit>=3.8.0",
+    "pyright>=1.1.378",
+    "coverage>=7.6.1",
+]
 
 [tool.pyright]
 include = ["src", "tests"]
 venvPath = "."
 venv = ".venv"
+
+[tool.coverage.html]
+skip_covered = true
+skip_empty = true
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if __name__ == .__main__.:",
+
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+]

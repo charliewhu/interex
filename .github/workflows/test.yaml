@@ -7,7 +7,7 @@ on:
 
 jobs:
   test:
-    
+
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -23,6 +23,12 @@ jobs:
         with:
           path: /tmp/.uv-cache
           key: uv-${{ runner.os }}-${{ hashFiles('uv.lock') }}
+
+      - name: Run linter
+        run: uv run ruff check .
+
+      - name: Run type check
+        run: uv run pyright
 
       - name: Run the automated tests
         run: uv run pytest -v
