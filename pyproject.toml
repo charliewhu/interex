@@ -18,3 +18,5 @@ dev-dependencies = ["pytest>=8.3.2", "pre-commit>=3.8.0", "pyright>=1.1.378"]
 
 [tool.pyright]
 include = ["src", "tests"]
+venvPath = "."
+venv = ".venv"
