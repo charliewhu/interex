@@ -1,0 +1,31 @@
+services:
+  fastapi:
+    build: .
+    expose:
+      - 8000
+    ports:
+      - 8000:8000
+    volumes:
+      - ./src/api/:/app/src/api/
+    # command: fastapi run src/api/app.py
+    command: fastapi dev src/api/app.py --host 0.0.0.0
+
+  sveltekit:
+    # env_file:
+      # - .env
+    build: ./frontend
+    # command: node -r dotenv/config build
+    # command: node build
+    command: pnpm dev --host
+    expose:
+      - 5173
+    volumes:
+      - ./frontend/src/:/frontend/src/
+
+  nginx:
+    build: ./nginx
+    ports:
+      - 80:80
+    depends_on:
+      - sveltekit
+      - fastapi
