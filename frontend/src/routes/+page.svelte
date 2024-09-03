@@ -1,9 +1,11 @@
 <script lang="ts">
 	// let { data } = $props();
+	const baseUrl = 'ws://0.0.0.0:5173'
+
 	let input = $state('')
 
 	let client_id = Date.now()
-	let chat = new WebSocket(`ws://0.0.0.0/api/ws/chat/${client_id}`)
+	let chat = new WebSocket(`${baseUrl}/api/ws/chat/${client_id}`)
 	let messages: string[] = $state([])
 
 	chat.onmessage = function (event) {
@@ -23,7 +25,7 @@
 	let currentPrice: number = $state(0)
 	let error: string = $state('')
 
-	let orderBook = new WebSocket(`ws://0.0.0.0/api/ws/orders`)
+	let orderBook = new WebSocket(`${baseUrl}/api/ws/orders`)
 
 	orderBook.onmessage = function (event) {
 		const eventData = JSON.parse(event.data)
