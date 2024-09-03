@@ -17,4 +17,4 @@ RUN pnpm install
 COPY . /frontend/
 
 # build app
-RUN pnpm build
+# RUN pnpm build

@@ -6,11 +6,12 @@ services:
     ports:
       - 8000:8000
     volumes:
-      - ./src/api/:/app/src/api/
+      - ./src/:/app/src/
     # command: fastapi run src/api/app.py
     command: fastapi dev src/api/app.py --host 0.0.0.0
 
   sveltekit:
+    restart: always
     # env_file:
       # - .env
     build: ./frontend
@@ -23,6 +24,7 @@ services:
       - ./frontend/src/:/frontend/src/
 
   nginx:
+    restart: always
     build: ./nginx
     ports:
       - 80:80
