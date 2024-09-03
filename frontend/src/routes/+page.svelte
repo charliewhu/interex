@@ -1,6 +1,6 @@
 <script lang="ts">
 	// let { data } = $props();
-	const baseUrl = 'ws://0.0.0.0:5173'
+	const baseUrl = 'ws://0.0.0.0:8080'
 
 	let input = $state('')
 
