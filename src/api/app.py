@@ -52,6 +52,24 @@ def create_app(
 
     @app.websocket("/api/ws/orders")
     async def submit_order(websocket: WebSocket):
+        """
+        On connect: send order_book data
+        On action: broadcast data
+        On disconnect: disconnect from exchange
+        """
+        # data = await exchange.connect(websocket)
+
+        # try:
+        #     while True:
+        #         data = await websocket.receive_json()
+
+        #         response = exchange.order(data)
+        #         await websocket.send_json(response_data)
+
+        # except WebSocketDisconnect:
+        #     order_manager.disconnect(websocket)
+
+        ###############################################################
         await order_manager.connect(websocket)
 
         prices = order_book.get_prices()
@@ -119,7 +137,7 @@ def create_app(
             <script>
                 var client_id = Date.now()
                 document.querySelector("#ws-id").textContent = client_id;
-                var ws = new WebSocket(`ws://localhost:8000/api/ws/chat/${client_id}`);
+                var ws = new WebSocket(`ws://localhost:8080/api/ws/chat/${client_id}`);
                 ws.onmessage = function(event) {
                     var messages = document.getElementById('messages')
                     var message = document.createElement('li')
