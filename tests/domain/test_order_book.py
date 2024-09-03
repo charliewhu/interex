@@ -7,9 +7,8 @@ def test_limit_order_placement():
     # Create User
 
     # Create Order
-    order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    order = models.Order(
+        user_id="1",
         quantity=1,
         price=90,
     )
@@ -20,6 +19,7 @@ def test_limit_order_placement():
 
     # Check if the order was placed correctly
     assert len(order_book.orders) == 1
+    assert order.price is not None
     assert order_book.orders[order.price]
 
 
@@ -30,9 +30,8 @@ def test_buy_order_above_market():
     """
 
     # Create Order
-    order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    order = models.Order(
+        user_id="1",
         quantity=1,
         price=100,
     )
@@ -46,9 +45,8 @@ def test_buy_order_above_market():
 
 def test_sell_order_below_market():
     # Create Order
-    order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    order = models.Order(
+        user_id="1",
         quantity=-1,
         price=80,
     )
@@ -62,9 +60,8 @@ def test_sell_order_below_market():
 
 def test_zero_order():
     # Create Order
-    order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    order = models.Order(
+        user_id="1",
         quantity=0,
         price=80,
     )
@@ -84,27 +81,29 @@ def test_market_order():
     order_book = models.OrderBook()
 
     # Create sell limit order
-    limit_order = models.LimitOrder(
-        id=1,
-        user_id=1,
-        quantity=-1,
+    limit_order = models.Order(
+        user_id="1",
+        quantity=-2,
         price=110,
     )
     order_book.place_order(limit_order)
 
     # create market order
     market_order = models.Order(
-        id=2,
-        user_id=1,
+        user_id="1",
         quantity=1,
     )
 
+    assert limit_order.price is not None
     assert len(order_book.orders[limit_order.price]) == 1
 
     order_book.place_order(market_order)
 
-    # limit order should be taken
-    assert len(order_book.orders[limit_order.price]) == 0
+    # limit order should be taken with 1 offer remaining
+    assert len(order_book.orders[limit_order.price]) == 1
+    assert [order for order in order_book.get_prices() if order["price"] == 110][0][
+        "offers"
+    ] == 1
 
 
 def test_market_order_across_prices():
@@ -113,9 +112,8 @@ def test_market_order_across_prices():
     if there is a sell limit in the order book
     """
     # Create sell limit order
-    first_limit_order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    first_limit_order = models.Order(
+        user_id="1",
         quantity=-1,
         price=110,
     )
@@ -123,9 +121,8 @@ def test_market_order_across_prices():
     order_book.place_order(first_limit_order)
 
     # Create sell limit order
-    second_limit_order = models.LimitOrder(
-        id=2,
-        user_id=1,
+    second_limit_order = models.Order(
+        user_id="1",
         quantity=-1,
         price=111,
     )
@@ -133,10 +130,12 @@ def test_market_order_across_prices():
 
     # create buy market order
     market_order = models.Order(
-        id=3,
-        user_id=1,
+        user_id="1",
         quantity=2,
     )
+
+    assert first_limit_order.price is not None
+    assert second_limit_order.price is not None
 
     assert len(order_book.orders[first_limit_order.price]) == 1
     assert len(order_book.orders[second_limit_order.price]) == 1
@@ -155,9 +154,8 @@ def test_short_market_order_across_prices():
     """
 
     # Create buy limit order
-    first_limit_order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    first_limit_order = models.Order(
+        user_id="1",
         quantity=1,
         price=90,
     )
@@ -165,9 +163,8 @@ def test_short_market_order_across_prices():
     order_book.place_order(first_limit_order)
 
     # Create by limit order
-    second_limit_order = models.LimitOrder(
-        id=2,
-        user_id=1,
+    second_limit_order = models.Order(
+        user_id="1",
         quantity=1,
         price=89,
     )
@@ -175,10 +172,12 @@ def test_short_market_order_across_prices():
 
     # create sell market order
     market_order = models.Order(
-        id=3,
-        user_id=1,
+        user_id="1",
         quantity=-2,
     )
+
+    assert first_limit_order.price is not None
+    assert second_limit_order.price is not None
 
     assert len(order_book.orders[first_limit_order.price]) == 1
     assert len(order_book.orders[second_limit_order.price]) == 1
@@ -198,18 +197,16 @@ def test_sell_limit_filled_if_buy_limits_exist():
     order_book = models.OrderBook()
 
     # Create sell limit order
-    sell_limit_order = models.LimitOrder(
-        id=1,
-        user_id=1,
+    sell_limit_order = models.Order(
+        user_id="1",
         quantity=-1,
         price=110,
     )
     order_book.place_order(sell_limit_order)
 
     # Create buy limit order
-    buy_limit_order = models.LimitOrder(
-        id=2,
-        user_id=1,
+    buy_limit_order = models.Order(
+        user_id="1",
         quantity=1,
         price=90,
     )
@@ -219,12 +216,12 @@ def test_sell_limit_filled_if_buy_limits_exist():
 
     # create sell market order
     market_order = models.Order(
-        id=3,
-        user_id=1,
+        user_id="1",
         quantity=-1,
     )
     order_book.place_order(market_order)
 
+    assert sell_limit_order.price is not None
     assert len([order for price in order_book.orders.values() for order in price]) == 1
     assert order_book.orders[sell_limit_order.price]
 
@@ -234,12 +231,11 @@ def test_market_order_no_execution_if_no_limit_orders():
     Raise an exception if a market order is sent
     but no limit orders are in the orderbook
     """
-    order_book = models.OrderBook()
+    order_book = models.OrderBook(price=0)
 
     # create sell market order
     market_order = models.Order(
-        id=3,
-        user_id=1,
+        user_id="1",
         quantity=-1,
     )
 
