@@ -57,19 +57,6 @@ def create_app(
         On action: broadcast data
         On disconnect: disconnect from exchange
         """
-        # data = await exchange.connect(websocket)
-
-        # try:
-        #     while True:
-        #         data = await websocket.receive_json()
-
-        #         response = exchange.order(data)
-        #         await websocket.send_json(response_data)
-
-        # except WebSocketDisconnect:
-        #     order_manager.disconnect(websocket)
-
-        ###############################################################
         await order_manager.connect(websocket)
 
         prices = order_book.prices()
@@ -80,20 +67,11 @@ def create_app(
             while True:
                 data = await websocket.receive_json()
                 try:
-                    logger.info(f"{order_book=}")
-                    logger.info(f'{data['price'], data['quantity']}')
-                    logger.info(f"pre service: {order_book.prices()}")
-                    # order = models.Order(
-                    #     price=int(data["price"]),
-                    #     quantity=int(data["quantity"]),
-                    # )
-                    # order_book.place_order(order)
                     services.order(
                         order_book=order_book,
                         price=data["price"],
                         quantity=data["quantity"],
                     )
-                    logger.info(f"post service: {order_book.prices()}")
                     response_data = {
                         "price": order_book.last_price,
                         "prices": order_book.prices(),
