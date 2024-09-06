@@ -55,8 +55,9 @@ class OrderBook:
                 raise exceptions.InvalidOrder
             elif order.quantity > 0:
                 if (
+                    # prevent limit bids and offers at same price
                     order.price == self.last_price
-                    and self.bids[order.price].quantity > 0
+                    and self.offers[order.price].quantity < 0
                 ):
                     raise exceptions.InvalidOrder
                 if not self.bids[order.price]:
@@ -69,8 +70,9 @@ class OrderBook:
                     self.bids[order.price].quantity += order.quantity
             else:
                 if (
+                    # prevent limit bids and offer at same price
                     order.price == self.last_price
-                    and self.offers[order.price].quantity > 0
+                    and self.bids[order.price].quantity > 0
                 ):
                     raise exceptions.InvalidOrder
                 if not self.offers[order.price]:
@@ -106,6 +108,8 @@ class OrderBook:
                     orders[price].quantity += order.quantity
                     current_order.quantity += order.quantity
                     order.quantity = 0  # market order is filled
+
+                self.last_price = price
 
     def prices(self, quantity: int = 2):
         """Return list[dict] for combined bids and offers centered around last_price"""

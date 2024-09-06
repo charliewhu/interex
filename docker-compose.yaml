@@ -22,6 +22,8 @@ services:
       - 5173
     volumes:
       - ./frontend/src/:/frontend/src/
+    env_file:
+      - ./frontend/.env
 
   nginx:
     restart: always

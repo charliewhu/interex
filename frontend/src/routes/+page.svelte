@@ -1,6 +1,7 @@
 <script lang="ts">
+	import { PUBLIC_BASE_URL } from '$env/static/public'
 	// let { data } = $props();
-	const baseUrl = 'ws://0.0.0.0:8080'
+	const baseUrl = PUBLIC_BASE_URL
 
 	let input = $state('')
 

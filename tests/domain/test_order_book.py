@@ -262,12 +262,21 @@ def test_market_order_no_execution_if_no_limit_orders(order_book):
         order_book.place_order(market_order)
 
 
-def test_cannot_place_bids_and_offers_at_same_price(order_book):
+def test_cannot_place_limit_offers_at_same_price_as_bid(order_book):
     buy_limit = models.Order(quantity=1, price=order_book.last_price)
-
-    sell_limit = models.Order(quantity=1, price=order_book.last_price)
+    sell_limit = models.Order(quantity=-1, price=order_book.last_price)
 
     order_book.place_order(buy_limit)
 
     with pytest.raises(exceptions.InvalidOrder):
         order_book.place_order(sell_limit)
+
+
+def test_cannot_place_limit_bids_at_same_price_as_offer(order_book):
+    buy_limit = models.Order(quantity=1, price=order_book.last_price)
+    sell_limit = models.Order(quantity=-1, price=order_book.last_price)
+
+    order_book.place_order(sell_limit)
+
+    with pytest.raises(exceptions.InvalidOrder):
+        order_book.place_order(buy_limit)

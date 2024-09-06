@@ -67,11 +67,11 @@ def test_market_order_submission(client):
 
         # expect offers at price 101 to be reduced to 3
         expected_data = [
+            {"price": 103, "bids": 0, "offers": 0},
             {"price": 102, "bids": 0, "offers": 0},
             {"price": 101, "bids": 0, "offers": 3},
             {"price": 100, "bids": 0, "offers": 0},
             {"price": 99, "bids": 0, "offers": 0},
-            {"price": 98, "bids": 0, "offers": 0},
         ]
 
         assert data["prices"] == expected_data
