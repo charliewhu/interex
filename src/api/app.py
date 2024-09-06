@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 
 from domain import exceptions, models
-from services import services
+from service_layer import services
 
 
 def create_app(
@@ -57,22 +57,9 @@ def create_app(
         On action: broadcast data
         On disconnect: disconnect from exchange
         """
-        # data = await exchange.connect(websocket)
-
-        # try:
-        #     while True:
-        #         data = await websocket.receive_json()
-
-        #         response = exchange.order(data)
-        #         await websocket.send_json(response_data)
-
-        # except WebSocketDisconnect:
-        #     order_manager.disconnect(websocket)
-
-        ###############################################################
         await order_manager.connect(websocket)
 
-        prices = order_book.get_prices()
+        prices = order_book.prices()
         response_data = {"price": order_book.last_price, "prices": prices}
         await websocket.send_json(response_data)
 
@@ -80,20 +67,22 @@ def create_app(
             while True:
                 data = await websocket.receive_json()
                 try:
-                    price_list = services.add_order(
+                    services.order(
                         order_book=order_book,
-                        user_id="xyz",  # TODO: change to authed used
                         price=data["price"],
                         quantity=data["quantity"],
                     )
                     response_data = {
                         "price": order_book.last_price,
-                        "prices": price_list,
+                        "prices": order_book.prices(),
                     }
+
                     await order_manager.broadcast(json.dumps(response_data))
                 except exceptions.InvalidOrder:
                     response_data["error"] = "Invalid Order"
-                    print("invalid order")
+                    await websocket.send_json(response_data)
+                except exceptions.NoOrdersAvailable:
+                    response_data["error"] = "No Limit Orders Available"
                     await websocket.send_json(response_data)
 
         except WebSocketDisconnect:

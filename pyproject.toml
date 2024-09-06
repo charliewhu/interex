@@ -10,6 +10,7 @@ dependencies = [
     "fastapi[standard]>=0.112.2",
     "websockets>=13.0.1",
     "pytest-xdist>=3.6.1",
+    "attrs>=24.2.0",
 ]
 
 [build-system]
@@ -17,7 +18,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/ui", 'src/domain']
+packages = ["src/ui", 'src/domain', 'src/service_layer']
 
 [tool.uv]
 dev-dependencies = [
@@ -32,6 +33,10 @@ dev-dependencies = [
 include = ["src", "tests"]
 venvPath = "."
 venv = ".venv"
+
+[tool.pytest.ini_options]
+addopts = ['--strict-markers', '--strict-config', '-ra']
+testpaths = ['tests/']
 
 [tool.coverage.html]
 skip_covered = true
