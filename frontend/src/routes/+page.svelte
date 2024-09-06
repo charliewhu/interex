@@ -51,7 +51,7 @@
 			<span class="col-span-2 text-center">Bids</span>
 			<span class="col-span-2 text-center">Offers</span>
 			{#each prices as { price, bids, offers }}
-				<span class="text-base" class:text-white={price == currentPrice}>${price}</span>
+				<span class="text-base" class:text-primary={price == currentPrice}>${price}</span>
 				<button
 					class="col-span-2 btn btn-success text-lg"
 					onclick={() => sendOrder(price, quantity)}
@@ -72,7 +72,7 @@
 
 	<div class="grid grid-cols-4 grid-rows-3 gap-4 h-100 self-start items-center">
 		<span>Quantity:</span>
-		<span class="text-lg text-white">{quantity}</span>
+		<span class="text-lg text-primary">{quantity}</span>
 		<button class="btn btn-neutral" onclick={() => quantity++}>
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 				<path fill="currentColor" d="m7 15l5-5l5 5z" />
