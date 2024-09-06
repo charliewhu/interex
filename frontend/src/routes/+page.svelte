@@ -34,8 +34,8 @@
 		error = eventData.error
 	}
 
-	function sendOrder(price: number, quantity: number) {
-		const obj = { price, quantity }
+	function sendOrder(price: number | null, quantity: number) {
+		const obj = { price: price, quantity: quantity }
 		orderBook.send(JSON.stringify(obj))
 	}
 </script>
@@ -82,8 +82,17 @@
 				<path fill="currentColor" d="m7 10l5 5l5-5z" />
 			</svg>
 		</button>
-		<button class="col-span-2 btn btn-success w-full text-base">Buy Market</button>
-		<button class="col-span-2 btn btn-error w-full text-base">Sell Market</button>
+		<button
+			class="col-span-2 btn btn-success w-full text-base"
+			onclick={() => sendOrder(null, quantity)}
+			>Buy Market
+		</button>
+		<button
+			class="col-span-2 btn btn-error w-full text-base"
+			onclick={() => sendOrder(null, -quantity)}
+		>
+			Sell Market
+		</button>
 		<span class="col-span-4 text-error text-lg">{error}</span>
 	</div>
 </div>

@@ -94,7 +94,6 @@ def test_market_order():
     order_book.place_order(market_order)
 
     # limit order should be taken with 1 offer remaining
-    print(f"{order_book.offers[limit_order.price]=}")
     assert len(order_book.offers[limit_order.price].orders) == 1
     assert order_book.offers[limit_order.price].quantity == -1
 
@@ -248,12 +247,11 @@ def test_sell_limit_filled_if_buy_limits_exist():
     assert len(order_book.offers[buy_limit_order.price].orders) == 0
 
 
-def test_market_order_no_execution_if_no_limit_orders():
+def test_market_order_no_execution_if_no_limit_orders(order_book):
     """
     Raise an exception if a market order is sent
     but no limit orders are in the orderbook
     """
-    order_book = models.OrderBook(price=0)
 
     # create sell market order
     market_order = models.Order(
@@ -262,3 +260,14 @@ def test_market_order_no_execution_if_no_limit_orders():
 
     with pytest.raises(exceptions.NoOrdersAvailable):
         order_book.place_order(market_order)
+
+
+def test_cannot_place_bids_and_offers_at_same_price(order_book):
+    buy_limit = models.Order(quantity=1, price=order_book.last_price)
+
+    sell_limit = models.Order(quantity=1, price=order_book.last_price)
+
+    order_book.place_order(buy_limit)
+
+    with pytest.raises(exceptions.InvalidOrder):
+        order_book.place_order(sell_limit)

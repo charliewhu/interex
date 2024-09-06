@@ -38,6 +38,7 @@ class OrderBook:
             lambda: Price(orders=deque([]), quantity=0)
         )
         self.last_price = price
+        # self.last_direction: t.Literal["buy", "sell"]
 
     def place_order(self, order: Order):
         if not order.quantity:
@@ -53,6 +54,11 @@ class OrderBook:
             ):
                 raise exceptions.InvalidOrder
             elif order.quantity > 0:
+                if (
+                    order.price == self.last_price
+                    and self.bids[order.price].quantity > 0
+                ):
+                    raise exceptions.InvalidOrder
                 if not self.bids[order.price]:
                     self.bids[order.price] = Price(
                         orders=deque([order]),
@@ -62,6 +68,11 @@ class OrderBook:
                     self.bids[order.price].orders.append(order)
                     self.bids[order.price].quantity += order.quantity
             else:
+                if (
+                    order.price == self.last_price
+                    and self.offers[order.price].quantity > 0
+                ):
+                    raise exceptions.InvalidOrder
                 if not self.offers[order.price]:
                     self.offers[order.price] = Price(
                         orders=deque([order]),
@@ -81,16 +92,33 @@ class OrderBook:
             raise exceptions.NoOrdersAvailable
 
         for price in sorted(orders.keys(), reverse=(order.quantity < 0)):
-            print(f"{price=}")
             while abs(order.quantity) > 0 and orders[price].orders:
                 # while orders exist at this price
                 current_order = orders[price].orders[0]
+
                 if abs(current_order.quantity) <= abs(order.quantity):
                     # if limit doesnt contain enough orders
                     orders[price].quantity -= current_order.quantity
+                    order.quantity += current_order.quantity
                     orders[price].orders.popleft()
                 else:
                     # partially take from current limit order
                     orders[price].quantity += order.quantity
                     current_order.quantity += order.quantity
                     order.quantity = 0  # market order is filled
+
+    def prices(self, quantity: int = 2):
+        """Return list[dict] for combined bids and offers centered around last_price"""
+        min = self.last_price - quantity - 1
+        max = self.last_price + quantity
+
+        orders = [
+            {
+                "price": price,
+                "bids": self.bids[price].quantity,
+                "offers": abs(self.offers[price].quantity),
+            }
+            for price in range(max, min, -1)
+        ]
+
+        return orders
