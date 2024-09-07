@@ -31,10 +31,10 @@ class Price:
 
 class OrderBook:
     def __init__(self, price: int = 100) -> None:
-        self.bids: dict[int, Price] = defaultdict(
+        self._bids: dict[int, Price] = defaultdict(
             lambda: Price(orders=deque([]), quantity=0)
         )
-        self.offers: dict[int, Price] = defaultdict(
+        self._offers: dict[int, Price] = defaultdict(
             lambda: Price(orders=deque([]), quantity=0)
         )
         self.last_price = price
@@ -57,38 +57,38 @@ class OrderBook:
                 if (
                     # prevent limit bids and offers at same price
                     order.price == self.last_price
-                    and self.offers[order.price].quantity < 0
+                    and self._offers[order.price].quantity < 0
                 ):
                     raise exceptions.InvalidOrder
-                if not self.bids[order.price]:
-                    self.bids[order.price] = Price(
+                if not self._bids[order.price]:
+                    self._bids[order.price] = Price(
                         orders=deque([order]),
                         quantity=order.quantity,
                     )
                 else:
-                    self.bids[order.price].orders.append(order)
-                    self.bids[order.price].quantity += order.quantity
+                    self._bids[order.price].orders.append(order)
+                    self._bids[order.price].quantity += order.quantity
             else:
                 if (
                     # prevent limit bids and offer at same price
                     order.price == self.last_price
-                    and self.bids[order.price].quantity > 0
+                    and self._bids[order.price].quantity > 0
                 ):
                     raise exceptions.InvalidOrder
-                if not self.offers[order.price]:
-                    self.offers[order.price] = Price(
+                if not self._offers[order.price]:
+                    self._offers[order.price] = Price(
                         orders=deque([order]),
                         quantity=order.quantity,
                     )
                 else:
-                    self.offers[order.price].orders.append(order)
-                    self.offers[order.price].quantity += order.quantity
+                    self._offers[order.price].orders.append(order)
+                    self._offers[order.price].quantity += order.quantity
 
     def _match_market_order(self, order: Order):
         if order.quantity > 0:
-            orders = self.offers
+            orders = self._offers
         else:
-            orders = self.bids
+            orders = self._bids
 
         if all(orders[price].quantity == 0 for price in orders):
             raise exceptions.NoOrdersAvailable
@@ -119,8 +119,8 @@ class OrderBook:
         orders = [
             {
                 "price": price,
-                "bids": self.bids[price].quantity,
-                "offers": abs(self.offers[price].quantity),
+                "bids": self._bids[price].quantity,
+                "offers": abs(self._offers[price].quantity),
             }
             for price in range(max, min, -1)
         ]
