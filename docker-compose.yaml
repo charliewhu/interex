@@ -1,35 +1,37 @@
 services:
   fastapi:
+    restart: always
     build: .
     expose:
-      - 8080
+      - 3000
     ports:
-      - 8080:8080
+      - 3000:3000
     volumes:
       - ./src:/app/src
     # command: fastapi run src/api/app.py
-    command: fastapi dev src/api/app.py --host 0.0.0.0 --port 8080
+    command: fastapi dev src/api/app.py --host 0.0.0.0 --port 3000
 
   sveltekit:
     restart: always
-    # env_file:
-      # - .env
     build: ./frontend
-    # command: node -r dotenv/config build
-    # command: node build
-    command: pnpm dev --host
-    expose:
-      - 5173
     volumes:
       - ./frontend/src/:/frontend/src/
     env_file:
+      - .env
       - ./frontend/.env
+    expose:
+      - 3001
+    command: bash -c "if [ \"$${ENV}\" = \"dev\" ]; then
+                        pnpm dev --host --port 3001;
+                      else
+                        pnpm build && PORT=3001 node build --env-file=.env build;
+                      fi"
 
   nginx:
     restart: always
     build: ./nginx
     ports:
-      - 5173:5173
+      - 3002:3002
     depends_on:
       - sveltekit
       - fastapi

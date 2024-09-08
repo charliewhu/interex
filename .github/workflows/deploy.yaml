@@ -1,0 +1,49 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Test"]
+    types:
+      - completed
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+        # Checkout the latest code
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        # Deploy to virtual machine if tests pass
+        - name: Install SSH Key
+          uses: shimataro/ssh-key-action@v2
+          with:
+            key: ${{ secrets.SERVER_SSH_KEY }}
+            known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+        - name: Deploy commands
+          uses: appleboy/ssh-action@master
+          with:
+            host: ${{ secrets.HOST }}
+            username: ${{ secrets.USER }}
+            password: ${{ secrets.PASSWORD }}
+            key: ${{ secrets.SERVER_SSH_KEY }}
+            script: |
+              echo 'Deployment starting'
+
+              if [ ! -d ${{ github.event.repository.name }} ]; then
+                  echo "Repository directory does not exist. Cloning..."
+                  git clone https://github.com/${{ github.repository }}.git
+              else
+                  echo "Repository directory exists. Updating..."
+              fi
+
+              cd ${{ github.event.repository.name }}
+              git pull
+              docker compose down
+              docker compose up -d --build
+
+              echo 'Deployment successful'
