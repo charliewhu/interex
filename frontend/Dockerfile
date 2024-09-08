@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:22-slim
 
 # install pnpm
 ENV PNPM_HOME="/pnpm"
@@ -16,5 +16,5 @@ RUN pnpm install
 # copy project to workdir
 COPY . /frontend/
 
-# build app
+# # build app
 # RUN pnpm build

@@ -17,9 +17,9 @@ def test_limit_order_placement():
     order_book.place_order(order)
 
     # Check if the order was placed correctly
-    assert len(order_book.bids) == 1
+    assert len(order_book._bids) == 1
     assert order.price is not None
-    assert order_book.bids[order.price]
+    assert order_book._bids[order.price]
 
 
 def test_buy_order_above_market():
@@ -89,13 +89,13 @@ def test_market_order():
     )
 
     assert limit_order.price is not None
-    assert len(order_book.offers[limit_order.price].orders) == 1
+    assert len(order_book._offers[limit_order.price].orders) == 1
 
     order_book.place_order(market_order)
 
     # limit order should be taken with 1 offer remaining
-    assert len(order_book.offers[limit_order.price].orders) == 1
-    assert order_book.offers[limit_order.price].quantity == -1
+    assert len(order_book._offers[limit_order.price].orders) == 1
+    assert order_book._offers[limit_order.price].quantity == -1
 
 
 def test_market_order_across_prices():
@@ -126,17 +126,17 @@ def test_market_order_across_prices():
     assert first_limit_order.price is not None
     assert second_limit_order.price is not None
 
-    assert order_book.offers[first_limit_order.price].quantity == -1
-    assert order_book.offers[second_limit_order.price].quantity == -1
+    assert order_book._offers[first_limit_order.price].quantity == -1
+    assert order_book._offers[second_limit_order.price].quantity == -1
 
     order_book.place_order(market_order)
 
     # limit orders should be taken
-    assert order_book.offers[first_limit_order.price].quantity == 0
-    assert len(order_book.offers[first_limit_order.price].orders) == 0
+    assert order_book._offers[first_limit_order.price].quantity == 0
+    assert len(order_book._offers[first_limit_order.price].orders) == 0
 
-    assert order_book.offers[second_limit_order.price].quantity == 0
-    assert len(order_book.offers[second_limit_order.price].orders) == 0
+    assert order_book._offers[second_limit_order.price].quantity == 0
+    assert len(order_book._offers[second_limit_order.price].orders) == 0
 
 
 def test_market_order_at_last_price():
@@ -159,14 +159,14 @@ def test_market_order_at_last_price():
     )
 
     assert limit_order.price is not None
-    assert order_book.offers[limit_order.price].quantity == -2
+    assert order_book._offers[limit_order.price].quantity == -2
 
     order_book.place_order(market_order)
 
     # limit order should be taken with 1 offer remaining
-    assert order_book.offers[limit_order.price].quantity == -1
-    assert len(order_book.offers[limit_order.price].orders) == 1
-    assert order_book.offers[limit_order.price].orders[0].quantity == -1
+    assert order_book._offers[limit_order.price].quantity == -1
+    assert len(order_book._offers[limit_order.price].orders) == 1
+    assert order_book._offers[limit_order.price].orders[0].quantity == -1
 
 
 def test_short_market_order_across_prices():
@@ -198,17 +198,17 @@ def test_short_market_order_across_prices():
     assert first_limit_order.price is not None
     assert second_limit_order.price is not None
 
-    assert order_book.bids[first_limit_order.price].quantity == 1
-    assert len(order_book.bids[second_limit_order.price].orders) == 1
+    assert order_book._bids[first_limit_order.price].quantity == 1
+    assert len(order_book._bids[second_limit_order.price].orders) == 1
 
     order_book.place_order(market_order)
 
     # limit orders should be taken
-    assert order_book.bids[first_limit_order.price].quantity == 0
-    assert len(order_book.bids[first_limit_order.price].orders) == 0
+    assert order_book._bids[first_limit_order.price].quantity == 0
+    assert len(order_book._bids[first_limit_order.price].orders) == 0
 
-    assert order_book.bids[second_limit_order.price].quantity == 0
-    assert len(order_book.bids[second_limit_order.price].orders) == 0
+    assert order_book._bids[second_limit_order.price].quantity == 0
+    assert len(order_book._bids[second_limit_order.price].orders) == 0
 
 
 def test_sell_limit_filled_if_buy_limits_exist():
@@ -240,11 +240,11 @@ def test_sell_limit_filled_if_buy_limits_exist():
 
     # assert sell limit still there
     assert sell_limit_order.price is not None
-    assert order_book.offers[sell_limit_order.price].orders[0].quantity == -1
+    assert order_book._offers[sell_limit_order.price].orders[0].quantity == -1
 
     # assert buy limit is gone
     assert buy_limit_order.price is not None
-    assert len(order_book.offers[buy_limit_order.price].orders) == 0
+    assert len(order_book._offers[buy_limit_order.price].orders) == 0
 
 
 def test_market_order_no_execution_if_no_limit_orders(order_book):
@@ -262,7 +262,7 @@ def test_market_order_no_execution_if_no_limit_orders(order_book):
         order_book.place_order(market_order)
 
 
-def test_cannot_place_limit_offers_at_same_price_as_bid(order_book):
+def test_cannot_place_limit__offers_at_same_price_as_bid(order_book):
     buy_limit = models.Order(quantity=1, price=order_book.last_price)
     sell_limit = models.Order(quantity=-1, price=order_book.last_price)
 
@@ -272,7 +272,7 @@ def test_cannot_place_limit_offers_at_same_price_as_bid(order_book):
         order_book.place_order(sell_limit)
 
 
-def test_cannot_place_limit_bids_at_same_price_as_offer(order_book):
+def test_cannot_place_limit__bids_at_same_price_as_offer(order_book):
     buy_limit = models.Order(quantity=1, price=order_book.last_price)
     sell_limit = models.Order(quantity=-1, price=order_book.last_price)
 
