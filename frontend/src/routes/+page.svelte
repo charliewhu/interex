@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { PUBLIC_BASE_URL } from '$env/static/public'
+	import { Button } from '$lib/components/ui/button'
+	import { Input } from '$lib/components/ui/input'
 	// let { data } = $props();
 	const baseUrl = PUBLIC_BASE_URL
 
@@ -41,73 +43,75 @@
 	}
 </script>
 
-<h1>Interex Futures</h1>
+<h1 class="text-4xl font-extrabold tracking-tight mb-10">Interex Futures</h1>
 
-<h2 class="mb-3">Depth Of Market</h2>
-<div class="grid grid-cols-2 gap-14 mb-10">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-14 mb-10">
 	<div>
-		<div class="grid grid-cols-5 gap-4 justify-center items-center my-1">
-			<div></div>
-			<span class="col-span-2 text-center">Bids</span>
-			<span class="col-span-2 text-center">Offers</span>
-			{#each prices as { price, bids, offers }}
-				<span class="text-base" class:text-primary={price == currentPrice}>${price}</span>
-				<button
-					class="col-span-2 btn btn-success text-lg"
-					onclick={() => sendOrder(price, quantity)}
-					disabled={price > currentPrice}
-				>
-					{bids || '-'}
-				</button>
-				<button
-					class="col-span-2 btn btn-error text-lg"
-					onclick={() => sendOrder(price, -quantity)}
-					disabled={price < currentPrice}
-				>
-					{offers || '-'}
-				</button>
-			{/each}
+		<h2 class="text-xl font-extrabold tracking-tight mb-3">Depth Of Market</h2>
+		<div>
+			<div class="grid grid-cols-5 gap-4 justify-center items-center my-1">
+				<div></div>
+				<span class="col-span-2 text-center">Bids</span>
+				<span class="col-span-2 text-center">Offers</span>
+				{#each prices as { price, bids, offers }}
+					<span class="" class:font-extrabold={price == currentPrice}>${price}</span>
+					<Button
+						class="col-span-2 text-lg bg-green-500 hover:bg-green-600"
+						onclick={() => sendOrder(price, quantity)}
+						disabled={price > currentPrice}
+					>
+						{bids || '-'}
+					</Button>
+					<Button
+						class="col-span-2 text-lg bg-red-500 hover:bg-red-600"
+						onclick={() => sendOrder(price, -quantity)}
+						disabled={price < currentPrice}
+					>
+						{offers || '-'}
+					</Button>
+				{/each}
+			</div>
 		</div>
 	</div>
 
-	<div class="grid grid-cols-4 grid-rows-3 gap-4 h-100 self-start items-center">
-		<span>Quantity:</span>
-		<span class="text-lg text-primary">{quantity}</span>
-		<button class="btn btn-neutral" onclick={() => quantity++}>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-				<path fill="currentColor" d="m7 15l5-5l5 5z" />
-			</svg>
-		</button>
-		<button class="btn btn-neutral" onclick={() => quantity--} disabled={quantity <= 1}>
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-				<path fill="currentColor" d="m7 10l5 5l5-5z" />
-			</svg>
-		</button>
-		<button
-			class="col-span-2 btn btn-success w-full text-base"
-			onclick={() => sendOrder(null, quantity)}
-			>Buy Market
-		</button>
-		<button
-			class="col-span-2 btn btn-error w-full text-base"
-			onclick={() => sendOrder(null, -quantity)}
-		>
-			Sell Market
-		</button>
-		<span class="col-span-4 text-error text-lg">{error}</span>
+	<div>
+		<h2 class="text-xl font-extrabold tracking-tight mb-3">Adjust Order</h2>
+		<div class="grid grid-cols-4 grid-rows-3 gap-4 h-100 self-start items-center">
+			<span class="col-span-2">Quantity: <span class="text-lg">{quantity}</span></span>
+			<Button class="" onclick={() => quantity++}>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+					<path fill="currentColor" d="m7 15l5-5l5 5z" />
+				</svg>
+			</Button>
+			<Button class="" onclick={() => quantity--} disabled={quantity <= 1}>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+					<path fill="currentColor" d="m7 10l5 5l5-5z" />
+				</svg>
+			</Button>
+			<Button
+				class="col-span-2 w-full bg-green-500 hover:bg-green-600"
+				onclick={() => sendOrder(null, quantity)}>Buy Market</Button
+			>
+			<Button
+				class="col-span-2 w-full bg-red-500 hover:bg-red-600"
+				onclick={() => sendOrder(null, -quantity)}
+			>
+				Sell Market
+			</Button>
+			<span class="col-span-4 text-red-600 text-lg">{error}</span>
+		</div>
 	</div>
 </div>
 
-<h2>Market Chat</h2>
-<h3>Your User ID: {client_id}</h3>
-<form action="" onsubmit={(e) => sendMessage(e)}>
-	<input
-		type="text"
-		class="input input-bordered w-full max-w-xs"
-		autocomplete="off"
-		bind:value={input}
-	/>
-	<button class="btn btn-primary">Send</button>
+<h2 class="text-xl font-extrabold tracking-tight mb-2">Market Chat</h2>
+<h3 class="text-md tracking-tight mb-3">Your User ID: {client_id}</h3>
+<form
+	class="flex flex-col justify-center items-start gap-4 mb-6"
+	action=""
+	onsubmit={(e) => sendMessage(e)}
+>
+	<Input type="text" class="w-full max-w-xs" autocomplete="off" bind:value={input} />
+	<Button class="">Send</Button>
 </form>
 
 <ul>
