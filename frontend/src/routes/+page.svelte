@@ -111,7 +111,7 @@
 	onsubmit={(e) => sendMessage(e)}
 >
 	<Input type="text" class="w-full max-w-xs" autocomplete="off" bind:value={input} />
-	<Button class="">Send</Button>
+	<Button type="submit">Send</Button>
 </form>
 
 <ul>
