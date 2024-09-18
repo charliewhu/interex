@@ -21,21 +21,12 @@ services:
       - .env
       - ./frontend/.env
     expose:
-      - 3001
+      - 80
     command: bash -c "if [ \"$${ENV}\" = \"dev\" ]; then
                         pnpm dev --host --port 3001;
                       else
                         pnpm build && PORT=3001 node build --env-file=.env build;
                       fi"
-
-  nginx:
-    restart: always
-    build: ./nginx
-    expose:
-      - 80
-    depends_on:
-      - interex
-      - fastapi
     environment:
       - VIRTUAL_HOST=interex.charlieavery.site
     networks:
