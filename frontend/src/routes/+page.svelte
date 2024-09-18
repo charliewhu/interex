@@ -8,7 +8,7 @@
 	let input = $state('')
 
 	let client_id = Date.now()
-	let chat = new WebSocket(`${baseUrl}/api/ws/chat/${client_id}`)
+	let chat = new WebSocket(`${baseUrl}/ws/chat/${client_id}`)
 	let messages: string[] = $state([])
 
 	chat.onmessage = function (event) {
