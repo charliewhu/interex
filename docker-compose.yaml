@@ -4,12 +4,13 @@ services:
     build: .
     expose:
       - 3000
-    ports:
-      - 3000:3000
     volumes:
       - ./src:/app/src
-    # command: fastapi run src/api/app.py
     command: fastapi dev src/api/app.py --host 0.0.0.0 --port 3000
+    environment:
+      - VIRTUAL_HOST=api.interex.charlieavery.site
+    networks:
+      - web
 
   interex:
     restart: always
@@ -31,9 +32,15 @@ services:
     restart: always
     build: ./nginx
     expose:
-      - 3002
-    environment:
-      - VIRTUAL_HOST=interex.charlieavery.site
+      - 80
     depends_on:
       - interex
       - fastapi
+    environment:
+      - VIRTUAL_HOST=interex.charlieavery.site
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

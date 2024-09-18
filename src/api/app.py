@@ -50,7 +50,7 @@ def create_app(
     order_manager = ConnectionManager()
     chat_manager = ConnectionManager()
 
-    @app.websocket("/api/ws/orders")
+    @app.websocket("/ws/orders")
     async def submit_order(websocket: WebSocket):
         """
         On connect: send order_book data
@@ -88,7 +88,7 @@ def create_app(
         except WebSocketDisconnect:
             order_manager.disconnect(websocket)
 
-    @app.websocket("/api/ws/chat/{client_id}")
+    @app.websocket("/ws/chat/{client_id}")
     async def websocket_endpoint(websocket: WebSocket, client_id: int):
         await chat_manager.connect(websocket)
         await chat_manager.broadcast(
