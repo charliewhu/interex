@@ -21,8 +21,6 @@ services:
       - ./frontend/.env
     expose:
       - 3001
-    networks:
-      - web
     command: bash -c "if [ \"$${ENV}\" = \"dev\" ]; then
                         pnpm dev --host --port 3001;
                       else
@@ -32,12 +30,10 @@ services:
   nginx:
     restart: always
     build: ./nginx
-    ports:
-      - 3002:3002
+    expose:
+      - 3002
+    environment:
+      - VIRTUAL_HOST=interex.charlieavery.site
     depends_on:
       - interex
       - fastapi
-
-networks:
-  web:
-    external: true
