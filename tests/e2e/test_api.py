@@ -1,7 +1,7 @@
 import pytest
 
 
-WEBSOCKET_URL = "/api/ws/orders"
+WEBSOCKET_URL = "/ws/orders"
 
 
 def test_shows_price_levels(client):
