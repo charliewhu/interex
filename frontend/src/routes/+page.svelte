@@ -28,7 +28,7 @@
 	let currentPrice: number = $state(0)
 	let error: string = $state('')
 
-	let orderBook = new WebSocket(`${baseUrl}/api/ws/orders`)
+	let orderBook = new WebSocket(`${baseUrl}/ws/orders`)
 
 	orderBook.onmessage = function (event) {
 		const eventData = JSON.parse(event.data)

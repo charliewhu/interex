@@ -31,14 +31,10 @@ class Price:
 
 class OrderBook:
     def __init__(self, price: int = 100) -> None:
-        self._bids: dict[int, Price] = defaultdict(
-            lambda: Price(orders=deque([]), quantity=0)
-        )
-        self._offers: dict[int, Price] = defaultdict(
+        self._prices: dict[int, Price] = defaultdict(
             lambda: Price(orders=deque([]), quantity=0)
         )
         self.last_price = price
-        # self.last_direction: t.Literal["buy", "sell"]
 
     def place_order(self, order: Order):
         if not order.quantity:
@@ -47,48 +43,37 @@ class OrderBook:
         if order.price is None:
             self._match_market_order(order)
         else:
-            if (
-                order.price > self.last_price
-                and order.quantity > 0
-                or (order.price < self.last_price and order.quantity < 0)
+            if (order.price > self.last_price and order.quantity > 0) or (
+                order.price < self.last_price and order.quantity < 0
             ):
                 raise exceptions.InvalidOrder
-            elif order.quantity > 0:
+
+            # Get the existing price level (positive quantity for bids, negative for offers)
+            price_level = self._prices.get(order.price)
+
+            if price_level:
+                # Prevent limit bids/offers at the same price
                 if (
-                    # prevent limit bids and offers at same price
                     order.price == self.last_price
-                    and self._offers[order.price].quantity < 0
+                    and price_level.quantity * order.quantity < 0
                 ):
                     raise exceptions.InvalidOrder
-                if not self._bids[order.price]:
-                    self._bids[order.price] = Price(
-                        orders=deque([order]),
-                        quantity=order.quantity,
-                    )
-                else:
-                    self._bids[order.price].orders.append(order)
-                    self._bids[order.price].quantity += order.quantity
+
+                price_level.orders.append(order)
+                price_level.quantity += order.quantity
             else:
-                if (
-                    # prevent limit bids and offer at same price
-                    order.price == self.last_price
-                    and self._bids[order.price].quantity > 0
-                ):
-                    raise exceptions.InvalidOrder
-                if not self._offers[order.price]:
-                    self._offers[order.price] = Price(
-                        orders=deque([order]),
-                        quantity=order.quantity,
-                    )
-                else:
-                    self._offers[order.price].orders.append(order)
-                    self._offers[order.price].quantity += order.quantity
+                # Add new price level
+                self._prices[order.price] = Price(
+                    orders=deque([order]), quantity=order.quantity
+                )
 
     def _match_market_order(self, order: Order):
-        if order.quantity > 0:
-            orders = self._offers
-        else:
-            orders = self._bids
+        # filter self._prices for required only bids or offers
+        orders = {
+            price: value
+            for price, value in self._prices.items()
+            if value.quantity * order.quantity < 0
+        }
 
         if all(orders[price].quantity == 0 for price in orders):
             raise exceptions.NoOrdersAvailable
@@ -119,8 +104,12 @@ class OrderBook:
         orders = [
             {
                 "price": price,
-                "bids": self._bids[price].quantity,
-                "offers": abs(self._offers[price].quantity),
+                "bids": self._prices[price].quantity
+                if self._prices[price].quantity > 0
+                else 0,
+                "offers": abs(self._prices[price].quantity)
+                if self._prices[price].quantity < 0
+                else 0,
             }
             for price in range(max, min, -1)
         ]
