@@ -5,8 +5,8 @@ def test_add_buy_limit(order_book):
     """Check if the order was placed correctly"""
 
     services.order(order_book, 90, 1)
-    assert len(order_book._bids) == 1
-    assert order_book._bids[90]
+    assert len(order_book._prices) == 1
+    assert order_book._prices[90]
 
 
 def test_market_order(order_book):
@@ -22,5 +22,5 @@ def test_market_order(order_book):
     services.order(order_book, None, 1)
 
     # limit order should be taken with 1 offer remaining
-    assert len(order_book._offers[limit_price].orders) == 1
-    assert order_book._offers[limit_price].quantity == -1
+    assert len(order_book._prices[limit_price].orders) == 1
+    assert order_book._prices[limit_price].quantity == -1
