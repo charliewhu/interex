@@ -28,6 +28,16 @@ services:
                       else
                         pnpm build && PORT=3001 node build --env-file=.env build;
                       fi"
+    networks:
+      - web
+
+  nginx:
+    build: ./nginx
+    depends_on:
+      - fastapi
+      - interex
+    expose:
+      - 80
     environment:
       - VIRTUAL_HOST=interex.charlieavery.site
       - LETSENCRYPT_HOST=interex.charlieavery.site
